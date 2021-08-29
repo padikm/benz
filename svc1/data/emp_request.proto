@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package data;
+
+option go_package="svc2/data";
+
+
+message Emp {
+    string id = 1;
+    string name = 2;
+    int32 age = 3;
+    string address = 4;
+}
+
+message EmpReq {
+    Emp emp = 1;
+}
+
+message NoArg { }
+
+message EmpResp {
+    string id=1;
+}
+
+message GetResp {
+    repeated Emp emp = 1;
+}
+
+service CreateEmpService{
+    rpc Create(EmpReq) returns (EmpResp) {};
+    rpc Get(NoArg) returns (GetResp){};
+    rpc Edit(EmpReq) returns (EmpResp){};
+}
