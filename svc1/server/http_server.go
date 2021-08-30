@@ -11,14 +11,17 @@ import (
 	"time"
 )
 
-func StartHttpServer() {
-
+func NewMux() http.Handler {
 	r := mux.NewRouter()
 	r.HandleFunc("/employees", GetEmp).Methods("GET")
 	r.HandleFunc("/employees", CreateEmp).Methods("POST")
 	r.HandleFunc("/employees/{id}", EditEmp).Methods("PUT")
+	return r
+}
+
+func StartHttpServer() {
 	srv := &http.Server{
-		Handler:      r,
+		Handler:      NewMux(),
 		Addr:         "127.0.0.1:8000",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
@@ -40,7 +43,11 @@ func CreateEmp(response http.ResponseWriter, request *http.Request) {
 		response.Write([]byte(err.Error()))
 	}
 
-	res := client.GrpcClientCreateEmp(emp)
+	res,err := client.GrpcClientCreateEmp(emp)
+	if err != nil {
+		response.WriteHeader(http.StatusInternalServerError)
+		response.Write([]byte(err.Error()))
+	}
 	b, err = json.Marshal(&res)
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
@@ -53,7 +60,11 @@ func CreateEmp(response http.ResponseWriter, request *http.Request) {
 }
 
 func GetEmp(response http.ResponseWriter, request *http.Request) {
-	res := client.GrpcClientGetEmps()
+	res,err := client.GrpcClientGetEmps()
+	if err != nil {
+		response.WriteHeader(http.StatusInternalServerError)
+		response.Write([]byte(err.Error()))
+	}
 	b, err := json.Marshal(&res)
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
@@ -78,7 +89,11 @@ func EditEmp(response http.ResponseWriter, request *http.Request) {
 		response.Write([]byte(err.Error()))
 	}
 
-	res := client.GrpcClientEditEmps(emp)
+	res,err := client.GrpcClientEditEmps(emp)
+	if err != nil {
+		response.WriteHeader(http.StatusInternalServerError)
+		response.Write([]byte(err.Error()))
+	}
 	b, err = json.Marshal(&res)
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
