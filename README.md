@@ -1,4 +1,4 @@
-# ** Language Used Golang
+# Language Used Golang
 ## setup svc1
 1. clone the repo
 2. cd to svc1
