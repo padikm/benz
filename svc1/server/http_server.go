@@ -88,7 +88,8 @@ func EditEmp(response http.ResponseWriter, request *http.Request) {
 		response.WriteHeader(http.StatusInternalServerError)
 		response.Write([]byte(err.Error()))
 	}
-
+	vars := mux.Vars(request)
+	emp.Id = vars["id"]
 	res,err := client.GrpcClientEditEmps(emp)
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
