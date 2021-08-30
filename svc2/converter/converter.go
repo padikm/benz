@@ -10,10 +10,15 @@ import (
 	"svc2/svc2/data"
 )
 
-func JSONtoCSV(e data.Emp) string {
+type Converter struct {
+	CSVfile string
+	Xmlfile string
+}
+
+func (c Converter)JSONtoCSV(e data.Emp) string {
 	 var res string
 	uuid := uuid.New()
-	f, err := os.OpenFile("outputfile.csv",os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(c.CSVfile,os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -39,10 +44,11 @@ func JSONtoCSV(e data.Emp) string {
 }
 
 
-func CSVtoJson() []*data.Emp {
-	f, err := os.Open("outputfile.csv")
+func (c Converter) CSVtoJson() ([]*data.Emp,error) {
+	f, err := os.Open(c.CSVfile)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Println(err.Error())
+		return nil,err
 	}
 	defer f.Close()
 	r := csv.NewReader(f)
@@ -67,7 +73,7 @@ func CSVtoJson() []*data.Emp {
 		emp = append(emp, &e)
 	}
 }
-	return emp
+	return emp,nil
 }
 
 

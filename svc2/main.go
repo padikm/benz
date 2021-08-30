@@ -1,7 +1,14 @@
 package main
 
-import "svc2/server"
+import (
+	"svc2/converter"
+	"svc2/server"
+)
 
 func main()  {
-	server.StartGrpcServer()
+	srv := server.Server{}
+	srv.SetConverter(converter.Converter{
+		CSVfile: "csvoutput.csv",
+	})
+	server.StartGrpcServer(srv)
 }

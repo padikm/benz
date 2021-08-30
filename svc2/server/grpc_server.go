@@ -11,20 +11,22 @@ import (
 	"svc2/svc2/data"
 )
 
-func init() {
-	_, err := os.OpenFile("outputfile.csv",os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+
+type Server struct {
+	c converter.Converter
 }
 
-type server struct {
-
+func (s *Server) SetConverter (c converter.Converter) {
+	s.c = c
 }
 
-func (*server) Edit(ctx context.Context, emp *data.EmpReq) (*data.EmpResp, error) {
+func (s *Server) Edit(ctx context.Context, emp *data.EmpReq) (*data.EmpResp, error) {
 	log.Println("Edit called" ,emp)
-	emps := converter.CSVtoJson()
+
+	emps,err := s.c.CSVtoJson()
+	if err!=nil {
+		return nil,err
+	}
 	var res = &data.EmpResp{}
 	for i,e:= range emps {
 		if e.Id == emp.Emp.Id {
@@ -36,27 +38,31 @@ func (*server) Edit(ctx context.Context, emp *data.EmpReq) (*data.EmpResp, error
 			break;
 		}
 	}
-	if err := os.Truncate("outputfile.csv", 0); err != nil {
+	if err := os.Truncate(s.c.CSVfile, 0); err != nil {
 		log.Printf("Failed to truncate: %v", err)
 	}
 	for _,e := range emps {
-		converter.JSONtoCSV(*e)
+		s.c.JSONtoCSV(*e)
 	}
 	return res,nil
 }
 
-func (*server) Get(context.Context, *data.NoArg) (*data.GetResp, error) {
+func (s *Server) Get(context.Context, *data.NoArg) (*data.GetResp, error) {
 	log.Println("Get func called")
+	emps, err := s.c.CSVtoJson()
+	if err!=nil {
+		return nil,err
+	}
 	resp := data.GetResp{
-		Emp: converter.CSVtoJson(),
+		Emp: emps,
 	}
 	return &resp,nil
 }
 
-func (*server) Create( c context.Context, req *data.EmpReq) (*data.EmpResp, error) {
+func (s *Server) Create( c context.Context, req *data.EmpReq) (*data.EmpResp, error) {
 	log.Println("Create func called")
 	emp := req.GetEmp()
-	id := converter.JSONtoCSV(*emp)
+	id := s.c.JSONtoCSV(*emp)
 	res := data.EmpResp{
 		Id: id,
 	}
@@ -64,19 +70,20 @@ func (*server) Create( c context.Context, req *data.EmpReq) (*data.EmpResp, erro
 }
 
 
-func StartGrpcServer() {
+func StartGrpcServer(srv Server) {
 	l, err := net.Listen("tcp", "0.0.0.0:50051")
 
 	if err != nil {
 		log.Fatal("Failed ", err)
 	}
 
-	cert ,err := credentials.NewServerTLSFromFile("certs/server.crt","certs/server.pem")
+	cert ,err := credentials.NewServerTLSFromFile("certs/Server.crt","certs/Server.pem")
 	if err!=nil {
 		log.Fatal(err)
 	}
+
 	s := grpc.NewServer(grpc.Creds(cert))
-	data.RegisterCreateEmpServiceServer(s,&server{})
+	data.RegisterCreateEmpServiceServer(s,&srv)
 	if err:=s.Serve(l);err!=nil {
 		log.Fatal(err)
 	}
