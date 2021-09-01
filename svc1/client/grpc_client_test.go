@@ -11,7 +11,7 @@ func TestGrpcClientCreateEmps(t *testing.T) {
 	client := mock.MockGrpcClient{}
 	IntiClient(client)
 	defer c.Close()
-	empResp,err := GrpcClientCreateEmp(data.Emp{})
+	empResp,err := GrpcClientCreateEmp(data.Emp{},"CSV")
 	if  err!=nil && empResp.Id != "" {
 		t.Error("Failed")
 	}
@@ -22,7 +22,7 @@ func TestGrpcClientEditEmps(t *testing.T) {
 	client := mock.MockGrpcClient{}
 	IntiClient(client)
 	defer c.Close()
-	empResp,err := GrpcClientEditEmps(data.Emp{})
+	empResp,err := GrpcClientEditEmps(data.Emp{},"CSV")
 	if  err!=nil || empResp.Id != "" {
 		t.Error("Failed")
 	}

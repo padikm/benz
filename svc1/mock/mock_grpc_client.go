@@ -12,9 +12,10 @@ import (
 const bufSize = 1024 * 1024
 
 var lis *bufconn.Listener
-type server struct{}
+type server struct{
+	data.UnimplementedCreateEmpServiceServer
+}
 type MockGrpcClient struct {
-
 }
 
 func (*server) Edit(ctx context.Context, emp *data.EmpReq) (*data.EmpResp, error) {

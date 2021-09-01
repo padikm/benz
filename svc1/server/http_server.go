@@ -42,8 +42,9 @@ func CreateEmp(response http.ResponseWriter, request *http.Request) {
 		response.WriteHeader(http.StatusInternalServerError)
 		response.Write([]byte(err.Error()))
 	}
-
-	res,err := client.GrpcClientCreateEmp(emp)
+	headers := mux.Vars(request)
+	fileType := headers["fileType"]
+	res,err := client.GrpcClientCreateEmp(emp,fileType)
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
 		response.Write([]byte(err.Error()))
@@ -82,6 +83,8 @@ func EditEmp(response http.ResponseWriter, request *http.Request) {
 	//	response.WriteHeader(http.StatusBadRequest)
 	//	response.Write([]byte(err.Error()))
 	//}
+	headers := mux.Vars(request)
+	fileType := headers["fileType"]
 	emp := data.Emp{}
 	err = json.Unmarshal(b, &emp)
 	if err != nil {
@@ -90,7 +93,7 @@ func EditEmp(response http.ResponseWriter, request *http.Request) {
 	}
 	vars := mux.Vars(request)
 	emp.Id = vars["id"]
-	res,err := client.GrpcClientEditEmps(emp)
+	res,err := client.GrpcClientEditEmps(emp,fileType)
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
 		response.Write([]byte(err.Error()))

@@ -20,7 +20,7 @@ type GrpcClient interface {
 	NewGrpcClient() *grpc.ClientConn
 }
 
-func GrpcClientCreateEmp(emp data.Emp) (*data.EmpResp,error){
+func GrpcClientCreateEmp(emp data.Emp,store string) (*data.EmpResp,error){
 	clientEmp := data.NewCreateEmpServiceClient(c)
 	log.Println("Create grpc client ", c)
 	req := data.EmpReq{
@@ -30,6 +30,7 @@ func GrpcClientCreateEmp(emp data.Emp) (*data.EmpResp,error){
 			Address: emp.Address,
 		},
 	}
+	req.FileType = store
 	log.Println("grpc create req ", req)
 	res, err := clientEmp.Create(context.TODO(), &req)
 	if err != nil {
@@ -50,7 +51,7 @@ func GrpcClientGetEmps() (*data.GetResp,error){
 	return res,nil
 }
 
-func GrpcClientEditEmps(emp data.Emp) (*data.EmpResp,error){
+func GrpcClientEditEmps(emp data.Emp,store string) (*data.EmpResp,error){
 	clientEmp := data.NewCreateEmpServiceClient(c)
 	//log.Println("Created grpc client ", c)
 	req := data.EmpReq{
@@ -61,6 +62,7 @@ func GrpcClientEditEmps(emp data.Emp) (*data.EmpResp,error){
 			Address: emp.Address,
 		},
 	}
+	req.FileType = store
 	res, err := clientEmp.Edit(context.TODO(),&req)
 	if err != nil {
 		return nil,err
