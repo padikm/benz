@@ -5,7 +5,8 @@
 3. run go build
 4. it will create a binary svc1.exe(windows).
 5. run svc1.exe it will start http server
-**Note: Run svc1 with environment GODEBUG=x509ignoreCN=0 eg: set GODEBUG=x509ignoreCN=0 in windows. Some problem i am facing with ca certs. 
+
+** Note: Run svc1 with environment GODEBUG=x509ignoreCN=0 eg: set GODEBUG=x509ignoreCN=0 in windows. Some problem i am facing with ca certs. 
 ## setup svc2 
 1. clone the repo
 2. cd to svc2
