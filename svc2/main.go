@@ -9,6 +9,7 @@ func main()  {
 	srv := server.Server{}
 	srv.SetConverter(converter.Converter{
 		CSVfile: "csvoutput.csv",
+		Xmlfile: "xmloutput.xml",
 	})
 	server.StartGrpcServer(srv)
 }

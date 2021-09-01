@@ -13,7 +13,8 @@ message Emp {
 }
 
 message EmpReq {
-    Emp emp = 1;
+    string fileType = 1;
+    Emp emp = 2;
 }
 
 message NoArg { }

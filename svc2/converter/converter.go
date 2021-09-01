@@ -17,12 +17,13 @@ type Converter struct {
 	Xmlfile string
 }
 
-func (c Converter) JSONtoCSV(e data.Emp) string {
+func (c Converter) JSONtoCSV(e data.Emp) (string,error) {
 	var res string
 	uuid := uuid.New()
 	f, err := os.OpenFile(c.CSVfile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Println(err.Error() + c.CSVfile)
+		return "",err
 	}
 	defer f.Close()
 	w := csv.NewWriter(f)
@@ -39,10 +40,11 @@ func (c Converter) JSONtoCSV(e data.Emp) string {
 	fmt.Println(record)
 	err = w.Write(record)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Println(err.Error())
+		return "",err
 	}
 	w.Flush()
-	return res
+	return res,nil
 }
 
 func (c Converter) CSVtoJson() ([]*data.Emp, error) {
@@ -109,7 +111,7 @@ func (c Converter) JSONtoXML(e data.Emp) (string,error) {
 }
 type Emp struct {
 	Name    string `xml:"Name" json:"name"`
-	Age     int    `xml:"Age" json:"age"`
+	Age     int32    `xml:"Age" json:"age"`
 	Address string `xml:"Address" json:"address"`
 	Id      string `xml:"Id" json:"id"`
 }

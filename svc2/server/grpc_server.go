@@ -14,7 +14,9 @@ import (
 
 type Server struct {
 	c converter.Converter
+	data.UnimplementedCreateEmpServiceServer
 }
+
 
 func (s *Server) SetConverter (c converter.Converter) {
 	s.c = c
@@ -22,34 +24,76 @@ func (s *Server) SetConverter (c converter.Converter) {
 
 func (s *Server) Edit(ctx context.Context, emp *data.EmpReq) (*data.EmpResp, error) {
 	log.Println("Edit called" ,emp)
-
-	emps,err := s.c.CSVtoJson()
-	if err!=nil {
-		return nil,err
-	}
-	var res = &data.EmpResp{}
-	for i,e:= range emps {
-		if e.Id == emp.Emp.Id {
-			emps[i].Id = emp.Emp.Id
-			emps[i].Name = emp.Emp.Name
-			emps[i].Address = emp.Emp.Address
-			emps[i].Age = emp.Emp.Age
-			res.Id = emp.Emp.Id
-			break;
+	var res= &data.EmpResp{}
+	if emp.FileType=="CSV" {
+		emps, err := s.c.CSVtoJson()
+		if err != nil {
+			return nil, err
+		}
+		for i, e := range emps {
+			if e.Id == emp.Emp.Id {
+				emps[i].Id = emp.Emp.Id
+				emps[i].Name = emp.Emp.Name
+				emps[i].Address = emp.Emp.Address
+				emps[i].Age = emp.Emp.Age
+				res.Id = emp.Emp.Id
+				break;
+			}
+		}
+		if err := os.Truncate(s.c.CSVfile, 0); err != nil {
+			log.Printf("Failed to truncate: %v", err)
+		}
+		for _,e := range emps {
+			_,err = s.c.JSONtoCSV(*e)
+			log.Println(err)
+		}
+	} else {
+		emps, err := s.c.XMLtoJSON()
+		if err != nil {
+			return nil, err
+		}
+		for i, e := range emps {
+			if e.Id == emp.Emp.Id {
+				emps[i].Id = emp.Emp.Id
+				emps[i].Name = emp.Emp.Name
+				emps[i].Address = emp.Emp.Address
+				emps[i].Age = emp.Emp.Age
+				res.Id = emp.Emp.Id
+				break;
+			}
+		}
+		if err := os.Truncate(s.c.Xmlfile, 0); err != nil {
+			log.Printf("Failed to truncate: %v", err)
+		}
+		for _,e := range emps {
+			empData := data.Emp{
+				Id: e.Id,
+				Name: e.Name,
+				Age: e.Age,
+				Address: e.Address,
+			}
+			_,err = s.c.JSONtoXML(empData)
+			log.Println(err)
 		}
 	}
-	if err := os.Truncate(s.c.CSVfile, 0); err != nil {
-		log.Printf("Failed to truncate: %v", err)
-	}
-	for _,e := range emps {
-		s.c.JSONtoCSV(*e)
-	}
+
 	return res,nil
 }
 
 func (s *Server) Get(context.Context, *data.NoArg) (*data.GetResp, error) {
 	log.Println("Get func called")
 	emps, err := s.c.CSVtoJson()
+	empsXml,err := s.c.XMLtoJSON()
+	for _,e := range empsXml {
+		empData := data.Emp{
+			Id: e.Id,
+			Name: e.Name,
+			Age: e.Age,
+			Address: e.Address,
+		}
+		emps = append(emps,&empData)
+		log.Println(err)
+	}
 	if err!=nil {
 		return nil,err
 	}
@@ -62,7 +106,17 @@ func (s *Server) Get(context.Context, *data.NoArg) (*data.GetResp, error) {
 func (s *Server) Create( c context.Context, req *data.EmpReq) (*data.EmpResp, error) {
 	log.Println("Create func called")
 	emp := req.GetEmp()
-	id := s.c.JSONtoCSV(*emp)
+	var id string
+	var err error
+	if req.FileType=="CSV" {
+		id,err = s.c.JSONtoCSV(*emp)
+	} else {
+		id,err = s.c.JSONtoXML(*emp)
+	}
+	if err!=nil {
+		log.Println(err)
+		return nil,err
+	}
 	res := data.EmpResp{
 		Id: id,
 	}

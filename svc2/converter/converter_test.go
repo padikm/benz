@@ -14,7 +14,7 @@ func TestConverter_JSONtoCSV(t *testing.T) {
 		Address:"dummy addr",
 		Age: 26,
 	}
-	id := c.JSONtoCSV(emp)
+	id ,_ := c.JSONtoCSV(emp)
 	if len(id)==0 {
 		t.Fatal("Failed")
 	}
@@ -32,7 +32,7 @@ func TestConverter_CSVtoJson(t *testing.T) {
 		Address:"dummy addr",
 		Age: 26,
 	}
-	id := c.JSONtoCSV(emp)
+	id,_ := c.JSONtoCSV(emp)
 	if len(id)==0 {
 		t.Fatal("Failed")
 	}
